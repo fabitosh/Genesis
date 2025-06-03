@@ -1,4 +1,7 @@
+from pathlib import Path
 import genesis as gs
+from PIL import Image
+import numpy as np
 
 SCENE_WIDTH_M = 1.0
 
@@ -45,6 +48,23 @@ foil = scene.add_entity(
         scale=0.5,
     )
 )
+camera = scene.add_camera(
+    res=(320, 320),
+    pos=(SCENE_WIDTH_M*2, SCENE_WIDTH_M*2, 2),
+    lookat=(0.0, 0.0, 0.0),
+    fov=40,
+)
+
+
 scene.build()
-for i in range(1000):
+for i in range(200):
     scene.step()
+    RENDER_NTH_FRAME = 5
+    if i % RENDER_NTH_FRAME == 0:
+        rgb_data = camera.render(rgb=True)  # Extract image data and save it
+        img_array = rgb_data[0]
+        img = Image.fromarray((img_array * 255).astype(np.uint8))
+        save_dir = Path("imgs")
+        save_dir.mkdir(exist_ok=True)
+        img.save(f"{save_dir}/frame_{i:03d}.png")
+        print(f"Frame {i} saved to {save_dir}")
